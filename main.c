@@ -9,9 +9,9 @@
 
 typedef struct {
     char valeur[MAX_MOT];     
-    int occ;                  
-    int len;                  
-    int pos[MAX_POS];         
+    int occurance;                  
+    int longueur;                  
+    int position[MAX_POS];         
     int nbPos;                
 } Mot;
 
@@ -27,14 +27,14 @@ int est_palindrome(char *s){
     return 1;
 }
 
-void trier_lettres(char *s,char *out){
-    strcpy(out,s);
-    for(int i=0;i<strlen(out);i++)
-        for(int j=i+1;j<strlen(out);j++)
-            if(out[i]>out[j]){ 
-                char t=out[i]; 
-                out[i]=out[j]; 
-                out[j]=t; }
+void trier_lettres(char *s,char *msrt){
+    strcpy(msrt,s);
+    for(int i=0;i<strlen(msrt);i++)
+        for(int j=i+1;j<strlen(msrt);j++)
+            if(msrt[i]>msrt[j]){ 
+                char t=msrt[i]; 
+                msrt[i]=msrt[j]; 
+                msrt[j]=t; }
 }
 
 int chercher(Mot d[],int n,char *w){
@@ -45,17 +45,17 @@ int chercher(Mot d[],int n,char *w){
 }
 
 
-void ajouter(Mot d[],int *n,char *w,int pos){
+void ajouter(Mot d[],int *n,char *w,int position){
     int i=chercher(d,*n,w);
     if(i>=0){
-        d[i].occ++;
-        if(d[i].nbPos<MAX_POS) d[i].pos[d[i].nbPos++]=pos;
+        d[i].occurance++;
+        if(d[i].nbPos<MAX_POS) d[i].position[d[i].nbPos++]=position;
     } else if(*n<MAX_MOTS){
         strcpy(d[*n].valeur,w);
-        d[*n].occ=1;
-        d[*n].len=strlen(w);
+        d[*n].occurance=1;
+        d[*n].longueur=strlen(w);
         d[*n].nbPos=1;
-        d[*n].pos[0]=pos;
+        d[*n].position[0]=position;
         (*n)++;
     }
 }
@@ -64,18 +64,18 @@ void analyser(char *txt,Mot d[],int *n){
     *n=0;
     nettoyer(txt);
     char *tok=strtok(txt," \t\n");
-    int pos=0;
+    int position=0;
     while(tok){
-        ajouter(d,n,tok,++pos);
+        ajouter(d,n,tok,++position);
         tok=strtok(NULL," \t\n");
     }
     printf("%d mots uniques.\n",*n);
 }
 void afficher(Mot d[],int n){
     for(int i=0;i<n;i++){ 
-        printf("%-12s occurance:%d, longueur:%d, position:",d[i].valeur,d[i].occ,d[i].len);
+        printf("%-12s occurance:%d, longueur:%d, position:",d[i].valeur,d[i].occurance,d[i].longueur);
         for(int j=0;j<d[i].nbPos;j++) 
-        printf("%d ",d[i].pos[j]);
+        printf("%d ",d[i].position[j]);
         printf("\n");
     }
 }
@@ -84,7 +84,7 @@ void rechercher(Mot d[],int n,char *w,int partiel){
     int trouve=0;
     for(int i=0;i<n;i++){
         if((!partiel && !strcmp(d[i].valeur,w)) || (partiel && strstr(d[i].valeur,w))){
-            printf("%s occurance:%d\n",d[i].valeur,d[i].occ);
+            printf("%s occurance:%d\n",d[i].valeur,d[i].occurance);
             trouve=1;
         }
     }
@@ -97,9 +97,9 @@ void trier(Mot d[],int n,int critere){
             int c=0;
             if(critere==1) c=strcmp(d[i].valeur,d[j].valeur)>0;   
             else if(critere==2) 
-            c=d[i].occ<d[j].occ;              
+            c=d[i].occurance<d[j].occurance;              
             else if(critere==3) 
-            c=d[i].len>d[j].len;               
+            c=d[i].longueur>d[j].longueur;               
             if(c){ 
                 Mot t=d[i]; 
                 d[i]=d[j]; 
@@ -111,14 +111,14 @@ void statistiques(Mot d[],int n){
     int total=0, idxFreq=0, idxLong=0, idxCourt=0; 
     double somme=0;
     for(int i=0;i<n;i++){ 
-        total+=d[i].occ; 
-        somme+=d[i].len*d[i].occ;
-        if(d[i].occ>d[idxFreq].occ) idxFreq=i;
-        if(d[i].len>d[idxLong].len) idxLong=i;
-        if(d[i].len<d[idxCourt].len) idxCourt=i;
+        total+=d[i].occurance; 
+        somme+=d[i].longueur*d[i].occurance;
+        if(d[i].occurance>d[idxFreq].occurance) idxFreq=i;
+        if(d[i].longueur>d[idxLong].longueur) idxLong=i;
+        if(d[i].longueur<d[idxCourt].longueur) idxCourt=i;
     }
-    printf("Total:%d uniques:%d moyLongueur:%.2f\n",total,n,somme/total);
-    printf("Fréquent:%s Long:%s Court:%s\n",
+    printf("Total:%d\nuniques:%d\nmoyLongueur:%.2f\n",total,n,somme/total);
+    printf("Frequent:%s\nLong:%s\nCourt:%s\n",
            d[idxFreq].valeur,d[idxLong].valeur,d[idxCourt].valeur);
 }
 
@@ -126,7 +126,7 @@ void analyses(Mot d[],int n){
     printf("Palindromes:\n"); 
     int trouve=0;
     for(int i=0;i<n;i++) 
-        if(est_palindrome(d[i].valeur)&&d[i].len>1){ 
+        if(est_palindrome(d[i].valeur)&&d[i].longueur>1){ 
             printf(" %s",d[i].valeur); 
             trouve=1; 
         }
@@ -137,7 +137,7 @@ void analyses(Mot d[],int n){
     printf("Nuage de mots:\n"); 
     for(int i=0;i<n;i++){ 
         printf("%-10s ",d[i].valeur); 
-        for(int j=0;j<d[i].occ;j++) 
+        for(int j=0;j<d[i].occurance;j++) 
         putchar('*'); 
         printf("\n"); 
     }
@@ -173,7 +173,7 @@ int main(){
                    break;
             case 7: analyses(d,n); 
                    break;
-            case 8: printf("merci a vous!\n"); 
+            case 8: printf("A bientot !\n"); 
                    break;
         }
     }while(choix!=8);
